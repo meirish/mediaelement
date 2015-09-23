@@ -182,6 +182,18 @@ mejs.Utility = {
 			time = 0;
 		}
 
+		// Maintain backward compatibility with method signature before v2.18.
+		if (typeof options !== 'object') {
+			var format = 'm:ss';
+			format = arguments[1] ? 'hh:mm:ss' : format; // forceHours
+			format = arguments[2] ? format + ':ff' : format; // showFrameCount
+
+			options = {
+				currentTimeFormat: format,
+				framesPerSecond: arguments[3] || 25
+			};
+		}
+
 		var fps = options.framesPerSecond;
 		if(typeof fps === 'undefined') {
 			fps = 25;
@@ -1001,7 +1013,7 @@ mejs.HtmlMediaElementShim = {
 
 	create: function(el, o) {
 		var
-			options = mejs.MediaElementDefaults,
+			options = {},
 			htmlMediaElement = (typeof(el) == 'string') ? document.getElementById(el) : el,
 			tagName = htmlMediaElement.tagName.toLowerCase(),
 			isMediaTag = (tagName === 'audio' || tagName === 'video'),
@@ -1014,9 +1026,13 @@ mejs.HtmlMediaElementShim = {
 			prop;
 
 		// extend options
+		for (prop in mejs.MediaElementDefaults) {
+			options[prop] = mejs.MediaElementDefaults[prop];
+		}
 		for (prop in o) {
 			options[prop] = o[prop];
-		}
+		}		
+		
 
 		// clean up attributes
 		src = 		(typeof src == 'undefined' 	|| src === null || src == '') ? null : src;		
